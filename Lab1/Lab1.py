@@ -53,7 +53,7 @@ def choose_step_drop(f, x, h, beta=1, λ=0.5):
     return alpha
 
 
-def choose_step(f, x, h, method="fastest"):
+def choose_step(f, x, h, method="drop_step"):
     if method == "drop_step":
         return choose_step_drop(f, x, h)
     elif method == "fastest":
