@@ -1,7 +1,7 @@
 import numpy as np
 
 eps = 10 ** -7
-
+#Hi loch eto ia
 
 def f(x):
     a, b, c, d, e, f = 1., 4., 0.001, 0., -1., 0.
