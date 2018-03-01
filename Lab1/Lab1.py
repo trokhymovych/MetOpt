@@ -22,7 +22,7 @@ def derivative(f, x, h=eps):
     return np.array(grad)
 
 
-def minimize_one_dimension_golden_ratio(f, b=1/eps, a=-1/eps, eps=eps):
+def minimize_one_dimension_golden_ratio(f, b=1 / eps, a=-1 / eps, eps=eps):
     F = (1. + 5 ** 0.5) / 2
     while abs(b - a) > eps:
         x1 = b - (b - a) / F
@@ -46,7 +46,7 @@ def minimize_one_dimension(f, method):
     if method == "golden_ratio":
         return minimize_one_dimension_golden_ratio(f, a=0)
     elif method == "brute_force":
-        return minimize_one_dimension_brute_force(f, b=1, a=0, n=int(eps**-.5))
+        return minimize_one_dimension_brute_force(f, b=1, a=0, n=int(eps ** -.5))
 
 
 def choose_step_fastest(f, x, h, method):
@@ -56,9 +56,10 @@ def choose_step_fastest(f, x, h, method):
     return minimize_one_dimension(f_a, method)
 
 
-def choose_step_fragmentation(f, x, h, beta=1, λ=0.5):
+def choose_step_fragmentation(f, x, h, beta=1, λ=0.5, eps=eps):
     alpha = beta
-    while f(x + alpha * h) > f(x):
+    # while f(x + alpha * h) > f(x):
+    while f(x + alpha * h) - f(x) > - eps*alpha*h.dot(h):
         alpha *= λ
     return alpha
 
@@ -76,20 +77,32 @@ def norm(x):
     return sum([i ** 2 for i in x]) ** 0.5
 
 
-def minimize(f, x0, step_method, eps=eps):
+def minimize(f, x0, step_method, eps=eps, output=0):
+    i = 0
     x = np.copy(x0)
     h = -derivative(f, x, eps)
     alpha = choose_step(f, x, h, step_method)
+    print("x{0} = {1}\nα{0} = {2}\nf(x{0}) = {3}".format(i, x, alpha, f(x)))
     x1 = x + alpha * h
     while norm(x1 - x) > eps:
+        i += 1
         x = np.copy(x1)
         h = -derivative(f, x)
         alpha = choose_step(f, x, h, step_method)
+        print("x{0} = {1}\nα{0} = {2}\nf(x{0}) = {3}".format(i, x, alpha, f(x))) if i <= output else None
         x1 = x + alpha * h
     return x1
 
 
 x0 = np.array([0., 0.])
-print(minimize(func, x0, "fragmentation", eps))
-print(minimize(func, x0, "fastest_golden_ratio", eps))
-print(minimize(func, x0, "fastest_brute_force", eps))
+output = 3
+print("* * *   Градієнтний метод   * * *\n")
+print("Метод дроблення кроку")
+min = minimize(func, x0, "fragmentation", eps, output)
+print("Розв'язок: ", min,"\nmin f = ",func(min))
+print("Метод найшвидшого спуску з використанням методу золотого перетину одновимірної оптимізації")
+min = minimize(func, x0, "fastest_golden_ratio", eps, output)
+print("Розв'язок: ", min,"\nmin f = ",func(min))
+print("Метод найшвидшого спуску з використанням методу перебору одновимірної оптимізації")
+min = minimize(func, x0, "fastest_brute_force", eps, output)
+print("Розв'язок: ", min,"\nmin f = ",func(min))
